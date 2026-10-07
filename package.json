@@ -1,0 +1,17 @@
+{
+  "name": "mesa-migrate",
+  "version": "0.1.0",
+  "description": "Conservative migration checks for o1js applications moving to Mesa.",
+  "type": "module",
+  "bin": {
+    "mesa-migrate": "./src/cli.js"
+  },
+  "scripts": {
+    "test": "node --test",
+    "scan": "node ./src/cli.js scan"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT"
+}
