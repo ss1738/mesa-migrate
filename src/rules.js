@@ -6,6 +6,7 @@ export const RULES = [
     pattern: /\bTransaction\.setFeePerSnarkCost\s*\(/g,
     message:
       'Mesa removed Transaction.setFeePerSnarkCost(). Use Transaction.setFeePerAccountUpdate() after reviewing the transaction-limit change.',
+    replacement: 'Transaction.setFeePerAccountUpdate(',
     source:
       'https://github.com/o1-labs/o1js/blob/main/CHANGELOG.md#300---2026-08-18',
   },

@@ -1,4 +1,4 @@
-import { readFile, readdir } from 'node:fs/promises';
+import { readFile, readdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import { RULES } from './rules.js';
@@ -99,6 +99,30 @@ export function scanSource(source, file = '<memory>') {
   return findings;
 }
 
+export function applySafeFixes(source) {
+  let updatedSource = source;
+  const changes = [];
+
+  for (const rule of RULES) {
+    if (!rule.replacement) continue;
+
+    const masked = maskNonCode(updatedSource);
+    const pattern = new RegExp(rule.pattern.source, rule.pattern.flags);
+    const matches = [...masked.matchAll(pattern)];
+    if (matches.length === 0) continue;
+
+    for (const match of matches.toReversed()) {
+      updatedSource =
+        updatedSource.slice(0, match.index) +
+        rule.replacement +
+        updatedSource.slice(match.index + match[0].length);
+    }
+    changes.push({ ruleId: rule.id, replacements: matches.length });
+  }
+
+  return { source: updatedSource, changes };
+}
+
 async function collectFiles(target) {
   const entry = await readdir(target, { withFileTypes: true });
   const files = [];
@@ -128,4 +152,23 @@ export async function scanPath(target) {
   return findings.sort((left, right) =>
     left.file.localeCompare(right.file) || left.line - right.line || left.column - right.column,
   );
+}
+
+export async function fixPath(target, { write = false } = {}) {
+  const absoluteTarget = path.resolve(target);
+  const files = await collectFiles(absoluteTarget);
+  const changes = [];
+
+  for (const file of files) {
+    const source = await readFile(file, 'utf8');
+    const result = applySafeFixes(source);
+    if (result.changes.length === 0) continue;
+
+    if (write) await writeFile(file, result.source);
+    changes.push({
+      file: path.relative(absoluteTarget, file),
+      changes: result.changes,
+    });
+  }
+  return changes;
 }

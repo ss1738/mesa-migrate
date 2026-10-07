@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { maskNonCode, scanSource } from '../src/scanner.js';
+import { applySafeFixes, maskNonCode, scanSource } from '../src/scanner.js';
 
 test('finds removed Mesa transaction APIs with locations', () => {
   const source = [
@@ -38,5 +38,23 @@ test('reports an explicit pre-Mesa o1js package dependency', () => {
   assert.deepEqual(
     findings.map(({ ruleId, line, column }) => ({ ruleId, line, column })),
     [{ ruleId: 'MESA003', line: 2, column: 21 }],
+  );
+});
+
+test('plans a safe fee-cost replacement without touching comments', () => {
+  const source = [
+    '// Transaction.setFeePerSnarkCost(0.1);',
+    'Transaction.setFeePerSnarkCost(0.1);',
+  ].join('\n');
+
+  const result = applySafeFixes(source);
+
+  assert.deepEqual(result.changes, [{ ruleId: 'MESA001', replacements: 1 }]);
+  assert.equal(
+    result.source,
+    [
+      '// Transaction.setFeePerSnarkCost(0.1);',
+      'Transaction.setFeePerAccountUpdate(0.1);',
+    ].join('\n'),
   );
 });
