@@ -30,3 +30,13 @@ test('does not report API names in comments or strings', () => {
   assert.deepEqual(scanSource(source), []);
   assert.equal(maskNonCode(source).split('\n').length, 3);
 });
+
+test('reports an explicit pre-Mesa o1js package dependency', () => {
+  const source = '{\n  "dependencies": { "o1js": "^2.15.0" }\n}';
+  const findings = scanSource(source, 'package.json');
+
+  assert.deepEqual(
+    findings.map(({ ruleId, line, column }) => ({ ruleId, line, column })),
+    [{ ruleId: 'MESA003', line: 2, column: 21 }],
+  );
+});
