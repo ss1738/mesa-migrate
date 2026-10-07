@@ -79,8 +79,9 @@ export function scanSource(source, file = '<memory>') {
   const findings = [];
 
   for (const rule of RULES) {
+    const searchableSource = rule.includeStrings ? source : masked;
     const pattern = new RegExp(rule.pattern.source, rule.pattern.flags);
-    for (const match of masked.matchAll(pattern)) {
+    for (const match of searchableSource.matchAll(pattern)) {
       const location = lineAndColumn(source, match.index);
       findings.push({
         ruleId: rule.id,
@@ -106,7 +107,10 @@ async function collectFiles(target) {
       if (!IGNORED_DIRECTORIES.has(item.name)) {
         files.push(...(await collectFiles(path.join(target, item.name))));
       }
-    } else if (item.isFile() && SOURCE_EXTENSIONS.has(path.extname(item.name))) {
+    } else if (
+      item.isFile() &&
+      (SOURCE_EXTENSIONS.has(path.extname(item.name)) || item.name === 'package.json')
+    ) {
       files.push(path.join(target, item.name));
     }
   }

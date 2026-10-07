@@ -10,6 +10,7 @@ source. A clean report does not prove an application is Mesa-compatible.
 
 - `MESA001`: `Transaction.setFeePerSnarkCost()` was removed.
 - `MESA002`: `TransactionCost` constants were removed.
+- `MESA003`: the project declares an `o1js` dependency before 3.0.0.
 
 Each rule links to the o1js 3.0.0 changelog. More complex changes, including
 verification-key regeneration and state-model changes, require a human review

@@ -1,0 +1,6 @@
+{
+  "name": "legacy-zkapp",
+  "dependencies": {
+    "o1js": "^2.15.0"
+  }
+}
