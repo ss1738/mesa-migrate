@@ -22,7 +22,13 @@ and are deliberately not guessed by this early version.
 npm test
 node ./src/cli.js scan /path/to/zkapp
 node ./src/cli.js scan /path/to/zkapp --format json
+node ./src/cli.js fix /path/to/zkapp
+node ./src/cli.js fix /path/to/zkapp --write
 ```
+
+`fix` is a dry run unless `--write` is passed. It currently changes only
+`Transaction.setFeePerSnarkCost()` to `Transaction.setFeePerAccountUpdate()`.
+Review the diff before committing any change.
 
 ## Status
 
