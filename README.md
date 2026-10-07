@@ -11,6 +11,10 @@ source. A clean report does not prove an application is Mesa-compatible.
 - `MESA001`: `Transaction.setFeePerSnarkCost()` was removed.
 - `MESA002`: `TransactionCost` constants were removed.
 - `MESA003`: the project declares an `o1js` dependency before 3.0.0.
+- `MESA004`: `VerificationKey.toJSON()` may have a changed return shape.
+- `MESA005`: `mina-signer` is explicitly configured for Berkeley output.
+- `MESA006`: code references a removed Cairo gate type.
+- `MESA007`: the project declares `mina-signer` before v4.
 
 Each rule links to the o1js 3.0.0 changelog. More complex changes, including
 verification-key regeneration and state-model changes, require a human review
@@ -34,6 +38,10 @@ Review the diff before committing any change.
 
 This is an early proof of concept. It does not submit transactions, read private
 keys, or contact a Mina node.
+
+The scanner's behavior and its limits are documented in the
+[public demonstration](./docs/DEMONSTRATION.md). Planned work is deliberately
+kept separate in the [roadmap](./docs/ROADMAP.md).
 
 ## Source
 

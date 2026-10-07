@@ -74,12 +74,62 @@ export function maskNonCode(source) {
   return masked;
 }
 
+// Removes comments while preserving string literals, offsets, and newlines.
+// A small number of rules intentionally inspect literal configuration values.
+export function maskComments(source) {
+  let masked = '';
+  let index = 0;
+  let state = 'code';
+  let quote = '';
+
+  while (index < source.length) {
+    const current = source[index];
+    const next = source[index + 1];
+
+    if (state === 'code' && current === '/' && next === '/') {
+      state = 'line-comment';
+      masked += '  ';
+      index += 2;
+      continue;
+    }
+    if (state === 'code' && current === '/' && next === '*') {
+      state = 'block-comment';
+      masked += '  ';
+      index += 2;
+      continue;
+    }
+    if (state === 'code' && (current === "'" || current === '"' || current === '`')) {
+      state = 'string';
+      quote = current;
+    } else if (state === 'string' && current === '\\') {
+      masked += current;
+      if (next !== undefined) masked += next;
+      index += 2;
+      continue;
+    } else if (state === 'string' && current === quote) {
+      state = 'code';
+    } else if (state === 'line-comment' && current === '\n') {
+      state = 'code';
+    } else if (state === 'block-comment' && current === '*' && next === '/') {
+      state = 'code';
+      masked += '  ';
+      index += 2;
+      continue;
+    }
+
+    masked += state === 'line-comment' || state === 'block-comment' ? (current === '\n' ? '\n' : ' ') : current;
+    index += 1;
+  }
+  return masked;
+}
+
 export function scanSource(source, file = '<memory>') {
   const masked = maskNonCode(source);
+  const commentsMasked = maskComments(source);
   const findings = [];
 
   for (const rule of RULES) {
-    const searchableSource = rule.includeStrings ? source : masked;
+    const searchableSource = rule.includeStrings ? commentsMasked : masked;
     const pattern = new RegExp(rule.pattern.source, rule.pattern.flags);
     for (const match of searchableSource.matchAll(pattern)) {
       const location = lineAndColumn(source, match.index);
